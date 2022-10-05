@@ -5,6 +5,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from pathlib import Path
 from time import sleep
 from random import randrange
+from tqdm import tqdm
 
 Path('outputs').mkdir(exist_ok=True)
 
@@ -47,7 +48,7 @@ def collect_LRs(path_to_index_file: str, keyword: str):
     print(f'There are {len(index_file)} urls in the index file.')
     print('starting keyword search...')
     print(f'Litigation releases with keyword "{keyword}" will be saved.')
-    for url in index_file:
+    for url in tqdm(index_file):
         litigation_release = url.split('/')[-1].split(".")[0]
         year = url.split('/')[-2]
         if not isinstance(year, int):
@@ -58,20 +59,19 @@ def collect_LRs(path_to_index_file: str, keyword: str):
         if LR_text.upper().find(keyword.upper()) != -1:
             Path('outputs', 'litigation_releases_text', f'{year}').mkdir(parents=True, exist_ok=True)
             print(f'found {keyword} in {year}/{litigation_release}')
-            with open(f'outputs/litigation_releases_text/{litigation_release}.txt', mode='w') as text_file:
+            with open(f'outputs/litigation_releases_text/{year}/{litigation_release}.txt', mode='w') as text_file:
                 text_file.write(LR_text)
-        else:
-            print(f'{keyword} not found in {litigation_release}')
         sleep(randrange(1, 5))
 
 
 if __name__ == '__main__':
     # open browser
     browser_options = webdriver.ChromeOptions()
+    browser_options.add_argument('--headless')
     browser_service = Service(executable_path=ChromeDriverManager().install())
-    browser = webdriver.Chrome(service=browser_service)
+    browser = webdriver.Chrome(service=browser_service, options=browser_options)
 
     collect_LRs(path_to_index_file='outputs/litigation_releases_index.txt',
                 keyword='Twitter')
 
-    # browser.close()
+    browser.close()
