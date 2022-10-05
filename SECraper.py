@@ -10,7 +10,7 @@ main_page = 'https://www.sec.gov/litigation/litreleases.htm'
 
 
 # collect all the historical Litigation Releases for SEC Press
-def collect_historical_LRs(archive_url: str = main_page):
+def create_historical_LR_index(archive_url: str = main_page):
     # Go to SEC Litigation Releases
     browser.get(archive_url)
     archives = browser.find_element(By.ID,
@@ -31,6 +31,13 @@ def collect_historical_LRs(archive_url: str = main_page):
             url = element.get_attribute(name='href')
             LR_urls.append(url)
 
+    with open('outputs/litigation_releases_index.txt', mode='w') as index_file:
+        for url in LR_urls:
+            index_file.write(url+"\n")
+
+# collect Litigation Releases of interest
+def collect_historical_LRs(keyword: str = 'Twitter'):
+    for
 
 if __name__ == '__main__':
     # open browser
