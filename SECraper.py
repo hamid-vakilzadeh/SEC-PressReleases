@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from pathlib import Path
 
-Path.mkdir(Path('outputs'), exist_ok=True)
+Path('outputs').mkdir(exist_ok=True)
 
 main_page = 'https://www.sec.gov/litigation/litreleases.htm'
 
@@ -33,16 +33,40 @@ def create_historical_LR_index(archive_url: str = main_page):
 
     with open('outputs/litigation_releases_index.txt', mode='w') as index_file:
         for url in LR_urls:
-            index_file.write(url+"\n")
+            index_file.write(url + "\n")
+
 
 # collect Litigation Releases of interest
-def collect_historical_LRs(keyword: str = 'Twitter'):
-    for
+def collect_LRs(path_to_index_file: str, keyword: str):
+    Path('outputs','litigation_releases_text').mkdir(parents=True, exist_ok=True)
+    with open(path_to_index_file) as index_file:
+        index_file = index_file.read().split()
+
+    print(f'There are {len(index_file)} urls in the index file.')
+    print('starting keyword search...')
+    print(f'Litigation releases with keyword "{keyword}" will be saved.')
+    for url in index_file:
+        litigation_release = url.split('/')[-1].split(".")[0]
+        year = url.split('/')[-2]
+        if not isinstance(year, int):
+            year = 'Before 2006'
+
+        browser.get(url)
+        LR_text: str = browser.find_element(By.TAG_NAME, value='body').text
+        if LR_text.upper().find(keyword.upper()) != -1:
+            Path('outputs', 'litigation_releases_text', f'{year}').mkdir(parents=True, exist_ok=True)
+            print(f'found {keyword} in {year}/{litigation_release}')
+            with open(f'outputs/litigation_releases_text/{litigation_release}.txt', mode='w') as text_file:
+                text_file.write(LR_text)
+        else:
+            print(f'{keyword} not found in {litigation_release}')
+
 
 if __name__ == '__main__':
     # open browser
     browser_options = webdriver.ChromeOptions()
     browser_service = Service(executable_path=ChromeDriverManager().install())
     browser = webdriver.Chrome(service=browser_service)
+
 
     # browser.close()
