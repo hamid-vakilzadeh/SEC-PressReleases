@@ -3,6 +3,8 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from pathlib import Path
+from time import sleep
+from random import randrange
 
 Path('outputs').mkdir(exist_ok=True)
 
@@ -60,6 +62,7 @@ def collect_LRs(path_to_index_file: str, keyword: str):
                 text_file.write(LR_text)
         else:
             print(f'{keyword} not found in {litigation_release}')
+        sleep(randrange(1, 5))
 
 
 if __name__ == '__main__':
@@ -68,5 +71,7 @@ if __name__ == '__main__':
     browser_service = Service(executable_path=ChromeDriverManager().install())
     browser = webdriver.Chrome(service=browser_service)
 
+    collect_LRs(path_to_index_file='outputs/litigation_releases_index.txt',
+                keyword='Twitter')
 
     # browser.close()
