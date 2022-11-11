@@ -40,27 +40,28 @@ def create_historical_LR_index(archive_url: str = main_page):
 
 
 # collect Litigation Releases of interest
-def collect_LRs(path_to_index_file: str, keyword: str):
-    Path('outputs','litigation_releases_text').mkdir(parents=True, exist_ok=True)
+def collect_LRs(path_to_index_file: str):
+    Path('outputs', 'litigation_releases_text').mkdir(parents=True, exist_ok=True)
     with open(path_to_index_file) as index_file:
         index_file = index_file.read().split()
 
     print(f'There are {len(index_file)} urls in the index file.')
     print('starting keyword search...')
-    print(f'Litigation releases with keyword "{keyword}" will be saved.')
     for url in tqdm(index_file):
         litigation_release = url.split('/')[-1].split(".")[0]
         year = url.split('/')[-2]
+        try:
+            year = int(year)
+        except ValueError:
+            pass
         if not isinstance(year, int):
             year = 'Before 2006'
 
         browser.get(url)
         LR_text: str = browser.find_element(By.TAG_NAME, value='body').text
-        if LR_text.upper().find(keyword.upper()) != -1:
-            Path('outputs', 'litigation_releases_text', f'{year}').mkdir(parents=True, exist_ok=True)
-            print(f'found {keyword} in {year}/{litigation_release}')
-            with open(f'outputs/litigation_releases_text/{year}/{litigation_release}.txt', mode='w') as text_file:
-                text_file.write(LR_text)
+        Path('outputs', 'litigation_releases_text', f'{year}').mkdir(parents=True, exist_ok=True)
+        with open(f'outputs/litigation_releases_text/{year}/{litigation_release}.txt', mode='w') as text_file:
+            text_file.write(LR_text)
         sleep(randrange(1, 5))
 
 
@@ -71,7 +72,6 @@ if __name__ == '__main__':
     browser_service = Service(executable_path=ChromeDriverManager().install())
     browser = webdriver.Chrome(service=browser_service, options=browser_options)
 
-    collect_LRs(path_to_index_file='outputs/litigation_releases_index.txt',
-                keyword='Twitter')
+    collect_LRs(path_to_index_file='outputs/litigation_releases_index.txt')
 
     browser.close()
