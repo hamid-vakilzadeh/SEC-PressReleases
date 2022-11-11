@@ -13,7 +13,7 @@ main_page = 'https://www.sec.gov/litigation/litreleases.htm'
 
 
 # collect all the historical Litigation Releases for SEC Press
-def create_historical_LR_index(archive_url: str = main_page):
+def create_historical_lr_index(archive_url: str = main_page):
     # Go to SEC Litigation Releases
     browser.get(archive_url)
     archives = browser.find_element(By.ID,
@@ -26,21 +26,21 @@ def create_historical_LR_index(archive_url: str = main_page):
         archive_urls.append(url)
 
     # find all Litigation Releases in each year (LR)
-    LR_urls = []
+    lr_urls = []
     for url in archive_urls:
         browser.get(url)
-        all_LRs = browser.find_elements(By.XPATH, '//a[contains(text(),"LR-")]')
-        for element in all_LRs:
+        all_lrs = browser.find_elements(By.XPATH, '//a[contains(text(),"LR-")]')
+        for element in all_lrs:
             url = element.get_attribute(name='href')
-            LR_urls.append(url)
+            lr_urls.append(url)
 
     with open('outputs/litigation_releases_index.txt', mode='w') as index_file:
-        for url in LR_urls:
+        for url in lr_urls:
             index_file.write(url + "\n")
 
 
 # collect Litigation Releases of interest
-def collect_LRs(path_to_index_file: str):
+def collect_lrs(path_to_index_file: str):
     Path('outputs', 'litigation_releases_text').mkdir(parents=True, exist_ok=True)
     with open(path_to_index_file) as index_file:
         index_file = index_file.read().split()
@@ -58,10 +58,10 @@ def collect_LRs(path_to_index_file: str):
             year = 'Before 2006'
 
         browser.get(url)
-        LR_text: str = browser.find_element(By.TAG_NAME, value='body').text
+        lr_text: str = browser.find_element(By.TAG_NAME, value='body').text
         Path('outputs', 'litigation_releases_text', f'{year}').mkdir(parents=True, exist_ok=True)
         with open(f'outputs/litigation_releases_text/{year}/{litigation_release}.txt', mode='w') as text_file:
-            text_file.write(LR_text)
+            text_file.write(lr_text)
         sleep(randrange(1, 5))
 
 
@@ -72,6 +72,6 @@ if __name__ == '__main__':
     browser_service = Service(executable_path=ChromeDriverManager().install())
     browser = webdriver.Chrome(service=browser_service, options=browser_options)
 
-    collect_LRs(path_to_index_file='outputs/litigation_releases_index.txt')
+    collect_lrs(path_to_index_file='outputs/litigation_releases_index.txt')
 
     browser.close()
